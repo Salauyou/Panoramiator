@@ -2,7 +2,7 @@ package ru.salauyou.panoramiator;
 
 public interface I_GeolocListener {
 
-	/* callback when location was updated */
+	/* callback on location update */
 	void locationUpdate(double longitude, double latitude, int provider);
 	
 }
