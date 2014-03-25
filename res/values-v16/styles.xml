@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
+ 		
+    </style>
+    
+    <style name="layoutInfoHeader" >
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">#D14836</item>
+        <item name="android:textSize">25dp</item>  
+        <item name="android:lineSpacingMultiplier">0.83</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">9dp</item>
+        <item name="android:paddingLeft">2dp</item>
+    </style>
+    
+    
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Panoramiator</string>
+    
+    <string name="select_qty">Number\nof images</string>
+    <string name="select_period">Slideshow\nperiod</string>
+    <string name="button_start">START THE MAGIC</string>
+    <string name="text_view_status">Images will be added to the slideshow\nas they are downloaded</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Panoramiator</string>
+    
+    <string name="select_qty">Количество\nфотографий</string>
+    <string name="select_period">Период\nслайд-шоу</string>
+    <string name="button_start">СТАРТ</string>
+    <string name="text_view_status">Фотографии будут добавляться в слайд-шоу\nпо мере их загрузки</string>
+</resources>

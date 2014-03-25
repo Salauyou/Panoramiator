@@ -1,0 +1,93 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="@drawable/main_background"
+    tools:context=".MainActivity" >
+
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="90dp"
+        android:background="#333"
+        android:layout_alignParentTop="true"
+        >
+        
+        <ImageView
+        android:layout_width="220dp"
+        android:layout_height="41dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/logo_top"
+        />
+    </RelativeLayout>
+    
+
+    <RelativeLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingTop="50dp"
+        >
+        <TextView
+        	android:id="@+id/textViewQty"
+        	android:layout_width="120dp"
+        	android:layout_height="wrap_content"
+        	android:text="@string/select_qty"
+        	android:gravity="center_horizontal"
+        	android:textSize="18dp"
+        	/>
+        
+        <TextView
+        	android:id="@+id/textViewPeriod"
+        	android:layout_toRightOf="@id/textViewQty"
+        	android:layout_width="120dp"
+        	android:layout_height="wrap_content"
+        	android:text="@string/select_period"
+        	android:gravity="center_horizontal"
+        	android:textSize="18dp"
+        	/>
+        
+	    <NumberPicker
+			android:id="@+id/numberPickerQty"
+			android:descendantFocusability="blocksDescendants"
+			android:focusable="false"
+			android:layout_width="100dp"
+			android:layout_below="@id/textViewQty"
+			android:layout_marginLeft="10dp"
+			android:layout_height="160dp"
+			android:layout_marginTop="5dp"
+			android:layout_marginBottom="10dp"
+			/>
+
+    	<NumberPicker
+        	android:id="@+id/numberPickerPeriod"
+        	android:descendantFocusability="blocksDescendants"
+        	android:focusable="false"
+        	android:layout_width="100dp"
+        	android:layout_below="@id/textViewPeriod"
+        	android:layout_alignLeft="@id/textViewPeriod"
+        	android:layout_height="160dp"
+        	android:layout_marginTop="5dp"
+        	android:layout_marginBottom="10dp"
+        	android:layout_marginLeft="10dp"
+        	
+ 			/>
+    	
+    	<Button 
+    	    android:id="@+id/buttonStart"
+    	    android:layout_width="220dp"
+    	    android:layout_below="@id/numberPickerQty"
+    	    android:layout_centerHorizontal="true"
+    	    android:layout_marginLeft="15dp"
+    	    android:gravity="center"
+    	    android:layout_height="wrap_content"
+    	    android:textSize="15dp"
+    	    android:text="@string/button_start"
+    	    android:background="@drawable/button_start"
+    	    android:textColor="#fff"
+    	    android:onClick="slideShowStart"
+    	    />
+    	
+ </RelativeLayout>
+
+</RelativeLayout>

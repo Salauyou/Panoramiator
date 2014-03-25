@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutBackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="#333"
+    >
+
+    <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" 
+            android:layout_centerInParent="true"
+            />
+    <TextView
+        android:id="@+id/textViewStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressBar"
+        android:layout_centerHorizontal="true"
+        android:padding="7dp"
+        android:gravity="center_horizontal"
+        android:text="@string/text_view_status"
+        android:textSize="13dp"
+        android:textColor="#aaa"
+        />
+    
+    <ImageSwitcher
+        android:id="@+id/imageSwitcherSlideShow"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:onClick="slideShowToggle"
+        />
+    
+    <!-- layout to show image info -->
+    <RelativeLayout 
+        android:id="@+id/layoutInfo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/view_info"
+        android:layout_marginRight="43dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_alignParentBottom="true"
+        android:onClick="viewInfoClick"
+    	>
+        <!-- header -->
+        <TextView 
+            android:id="@+id/layoutInfoHeader"
+            style="@style/layoutInfoHeader"
+            android:text=""
+            />
+        
+        <!-- author -->
+        <ImageView 
+            android:id="@+id/layoutInfoIconAuthor"
+            style="@style/layoutInfoIcon"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/icon_user"
+            android:layout_below="@id/layoutInfoHeader"
+            android:layout_alignLeft="@id/layoutInfoHeader"
+            />
+        <TextView 
+            android:id="@+id/layoutInfoAuthor"
+            style="@style/layoutInfoItem"
+            android:layout_alignTop="@id/layoutInfoIconAuthor"
+            android:layout_toRightOf="@id/layoutInfoIconAuthor"
+            android:text=""
+            />
+        
+        <!-- date -->
+         <ImageView 
+            android:id="@+id/layoutInfoIconDate"
+            style="@style/layoutInfoIcon"
+            android:src="@drawable/icon_date"
+            android:layout_below="@id/layoutInfoIconAuthor"
+            android:layout_alignLeft="@id/layoutInfoHeader"
+            />
+        <TextView 
+            android:id="@+id/layoutInfoDate"
+            style="@style/layoutInfoItem"
+            android:layout_alignTop="@id/layoutInfoIconDate"
+            android:layout_toRightOf="@id/layoutInfoIconDate"
+            android:text=""
+            />
+        
+         <!-- link -->
+         <ImageView 
+            android:id="@+id/layoutInfoIconLink"
+            style="@style/layoutInfoIcon"
+            android:src="@drawable/icon_link"
+            android:layout_below="@id/layoutInfoIconDate"
+            android:layout_alignLeft="@id/layoutInfoHeader"
+            />
+        <TextView 
+            android:id="@+id/layoutInfoLink"
+            style="@style/layoutInfoItem"
+            android:layout_alignTop="@id/layoutInfoIconLink"
+            android:layout_toRightOf="@id/layoutInfoIconLink"
+            android:text=""
+            android:linksClickable="true"
+            android:autoLink="web"
+            />
+    </RelativeLayout>
+
+	<Button
+        android:id="@+id/buttonInfo"
+        android:layout_height="54dp"
+        android:layout_width="54dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="11dp"
+        android:layout_marginBottom="11dp"
+        android:paddingRight="50dp"
+        android:background="@drawable/button_info"
+        android:text=""
+        android:onClick="viewInfoToggle"
+        />
+	
+	<ImageView 
+	    android:id="@+id/imageButtonInfo"
+	    android:layout_alignParentBottom="true"
+	    android:layout_alignParentRight="true"
+	    android:layout_marginRight="20dp"
+	    android:layout_marginBottom="20dp"
+	    android:src="@drawable/button_plus"
+	    android:layout_width="36dp"
+	    android:layout_height="36dp"
+	    />
+    
+	
+    
+	
+</RelativeLayout>
