@@ -50,9 +50,7 @@ public class ActivityStart extends Activity implements I_GeolocListener {
 		
 		// log
 		Log.println(Log.DEBUG, "panoramiator", "Start Activity created");
-		/*
-		Controller.getInstance().getGeolocService().addListener(this);
-		Controller.getInstance().getImageContainer().setQty(25);*/
+		
 	}
 
 
