@@ -1,1 +1,0 @@
-This is repository for Panoramiator app for Android 4.0+
