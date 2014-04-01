@@ -19,7 +19,13 @@ public class Controller {
 		Log.println(Log.DEBUG, "panoramiator", "Controller created");
 	}
 	
+	/**
+	 * Run Controller
+	 * 
+	 * @param context	Context of activity or application
+	 */
 	public void runController(Context context){
+		
 		// create and run geolocService using context for LocationManager
 		if (geolocService == null){
 			geolocService = new C_GeolocService(context);
@@ -35,6 +41,11 @@ public class Controller {
 		}
 	}
 	
+	/**
+	 * Get instance
+	 * 
+	 * @return	Instance of class
+	 */
 	public static Controller getInstance() {
 		if (instance == null){
 			instance = new Controller();
@@ -42,10 +53,19 @@ public class Controller {
 		return instance;
 	}
 	
+	/**
+	 * Get geolocation service object
+	 * 
+	 * @return	Geolocation service object
+	 */
 	public C_GeolocService getGeolocService() {
 		return geolocService == null ? null : geolocService;
 	}
 	
+	/**
+	 * Get image container
+	 * @return	Image container
+	 */
 	public C_ImageContainer getImageContainer() {
 		return imageContainer == null ? null : imageContainer;
 	}
