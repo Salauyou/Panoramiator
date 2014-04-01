@@ -39,18 +39,17 @@ public class ActivityStart extends Activity implements I_GeolocListener {
 			numberPickerQty.setValue(10);
 		}
 		numberPickerPeriod = (NumberPicker)findViewById(R.id.numberPickerPeriod);
-		numberPickerPeriod.setMinValue(5);
-		numberPickerPeriod.setMaxValue(20);
-		numberPickerPeriod.setDisplayedValues(new String[]{"0,5", "0,6", "0,7", "0,8", "0,9", "1", "1,1", "1,2", "1,3", "1,4", "1,5", "1,6", "1,7", "1,8", "1,9", "2"});
+		numberPickerPeriod.setMinValue(1);
+		numberPickerPeriod.setMaxValue(10);
+		numberPickerPeriod.setDisplayedValues(new String[]{"0,5", "1", "1,5", "2", "2,5", "3", "3,5", "4", "4,5", "5"});
 		if (savedInstanceState != null && savedInstanceState.containsKey("numberPickerPeriod")){
 			numberPickerPeriod.setValue(savedInstanceState.getInt("numberPickerPeriod"));
 		} else {
-			numberPickerPeriod.setValue(10);
+			numberPickerPeriod.setValue(4);
 		}        
 		
 		// log
 		Log.println(Log.DEBUG, "panoramiator", "Start Activity created");
-		
 	}
 
 
@@ -73,7 +72,7 @@ public class ActivityStart extends Activity implements I_GeolocListener {
 	//-------------- starting the slide show ------------------//
 	public void slideShowStart(View view){
 		Intent intentToSlideShow = new Intent(this, ActivitySlideShow.class);
-		intentToSlideShow.putExtra("slideShowPeriod", numberPickerPeriod.getValue() * 100);
+		intentToSlideShow.putExtra("slideShowPeriod", numberPickerPeriod.getValue() * 500);
 		Controller.getInstance().getImageContainer().reset();
 		Controller.getInstance().getImageContainer().setQty(numberPickerQty.getValue());
 		this.startActivity(intentToSlideShow);
@@ -84,5 +83,5 @@ public class ActivityStart extends Activity implements I_GeolocListener {
 	public void locationUpdate(double longitude, double latitude, int provider){
 		// empty
 	}
-
+	
 }
