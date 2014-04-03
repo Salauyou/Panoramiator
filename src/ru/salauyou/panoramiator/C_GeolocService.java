@@ -56,19 +56,19 @@ public class C_GeolocService {
 						isGpsAvailable = true;
 					}
 					
-					//   1 check if last location was get from any provider. 
-					// If yes, skip other conditions and update
-					//   2 check if GPS is avaliable and location received from GPS
-					//   3 check is GPS is unavalable and location received not from GPS
-					// If 2 or 3, check accuracy conditions:
+					//   1 check if last location was obtained not from GPS nor Network provider 
+					// If yes, skip other conditions and update.
+					//   2 check if GPS is avaliable and new location was received from GPS
+					//   3 check is GPS is unavalable
+					// If 2 or 3, need to follow at least one of accuracy conditions:
 					//   4 if new location has an accuracy and current doesn't
 					//   5 if new location is more accurate than current
-					//   6 if distance between new and current locations is greater than sum of their accuracy values
-					// If one of accuracy conditions is followed, update location
+					//   6 if distance between new location and current one is greater than sum of their accuracy values
+					// If at least one of 4, 5, 6 is followed, update location
 					if (locationStatus == STATUS_DISABLED || locationStatus == STATUS_LASTKNOWN  // 1
 						||  ((isGpsAvailable && locationNew.getProvider().equals(LocationManager.GPS_PROVIDER)) // 2 
-							  || (!isGpsAvailable && !locationNew.getProvider().equals(LocationManager.GPS_PROVIDER))  // 3 
-							) && ((locationNew.hasAccuracy() && !location.hasAccuracy())                         // 4
+							  || !isGpsAvailable    // 3 
+							) && ((locationNew.hasAccuracy() && !location.hasAccuracy())  // 4
 							       || (locationNew.hasAccuracy() && location.hasAccuracy() && (locationNew.getAccuracy() < location.getAccuracy())) // 5
 							       || (locationNew.hasAccuracy() && location.hasAccuracy() && (locationNew.distanceTo(location) > locationNew.getAccuracy() + location.getAccuracy())) // 6
 							     )
