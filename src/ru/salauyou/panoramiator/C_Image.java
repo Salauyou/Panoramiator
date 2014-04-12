@@ -4,7 +4,7 @@ import java.util.Date;
 
 import android.graphics.Bitmap;
 
-public class C_Image implements I_BitmapReceiver {
+public class C_Image implements C_ImageDownloader.Receiver {
 	private Bitmap _bitmap;
 	final private Date _date;
 	final private String _url;

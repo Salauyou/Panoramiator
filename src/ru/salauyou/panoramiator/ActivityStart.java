@@ -10,7 +10,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.NumberPicker;
 
-public class ActivityStart extends Activity implements I_GeolocListener {
+public class ActivityStart extends Activity {
 
 	
 	NumberPicker numberPickerQty, numberPickerPeriod;
@@ -76,12 +76,6 @@ public class ActivityStart extends Activity implements I_GeolocListener {
 		Controller.getInstance().getImageContainer().reset();
 		Controller.getInstance().getImageContainer().setQty(numberPickerQty.getValue());
 		this.startActivity(intentToSlideShow);
-	}
-	
-	//======== method(s) to implement I_GeolocListener ============
-	@Override
-	public void locationUpdate(double longitude, double latitude, int provider){
-		// empty
 	}
 	
 }

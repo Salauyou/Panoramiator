@@ -65,7 +65,7 @@ public class ActivitySlideShow extends Activity {
 					while (paused) {
 						synchronized(pauseObject) {
 							pauseObject.wait();
-						};
+						}
 					}
 					handlerSlideShow.sendMessage(Message.obtain());
 				}

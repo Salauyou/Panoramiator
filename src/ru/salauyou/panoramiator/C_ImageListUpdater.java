@@ -28,6 +28,22 @@ import android.util.Log;
 
 public class C_ImageListUpdater {
 
+	/**
+	 * Public interface to send new image list
+	 */
+	public interface Receiver {
+		
+		/**
+		 * Callback to be invoked when new image list is obtained
+		 * 
+		 * @param imagesReceived	New list of images
+		 * @param id				Id similar to id of query (getImagesPanoramio)
+		 */
+		void receiveImageList(ArrayList<C_Image> imagesReceived, int id);
+
+	}
+	
+	
 	// making Panoramio search variables static to make them accessible across instances
 	private static volatile double _latitudeDelta = 0.01; // ~ 1 km
 	private final static double DELTA_MIN = 0.0001; // ~ 10 meters 
@@ -43,7 +59,7 @@ public class C_ImageListUpdater {
 	/* Method to download and process image list from Panoramio.
 	 * Runs in separate thread, returns result via I_ImageListReceiver.
 	 */
-	public void getImagesPanoramio(final I_ImageListReceiver receiver, final int id, final double longitude, final double latitude, final int qty){
+	public void getImagesPanoramio(final Receiver receiver, final int id, final double longitude, final double latitude, final int qty){
 				
 		// set current 'id' to the last called to prevent needless IO methods calls
 		idGetImagesPanoramio = id;
@@ -180,7 +196,6 @@ public class C_ImageListUpdater {
 					while (!panoramioHasMore(deltaR)){
 						deltaR *= 2.0;
 					}
-					
 					
 					// proceed binary search
 					delta = (deltaR - deltaL)/2.0;

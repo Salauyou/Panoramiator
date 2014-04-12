@@ -10,8 +10,16 @@ import android.util.Log;
 
 public class C_ImageDownloader {
 
+	/**
+	 * Interface to send downladed bitmap
+	 */
+	public interface Receiver {
+		void receiveBitmap(Bitmap bitmap);
+	}
+	
+	
 	volatile private Bitmap bitmap;
-	private I_BitmapReceiver _receiver;
+	private Receiver _receiver;
 	private String _url;
 		
 	// handler to send bitmap
@@ -40,8 +48,13 @@ public class C_ImageDownloader {
 		}
 	};
 	
-	// constructor
-	public C_ImageDownloader(I_BitmapReceiver receiver, String url){
+	/**
+	 * Constructor
+	 * 
+	 * @param receiver	Object to receive downloaded bitmap
+	 * @param url		URL of image to download
+	 */
+	public C_ImageDownloader(Receiver receiver, String url){
 		_receiver = receiver;
 		_url = url;
 		threadImageDownloader.start();

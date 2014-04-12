@@ -1,13 +1,14 @@
 package ru.salauyou.panoramiator;
 
 import java.util.ArrayList;
+
 import android.util.Log;
 
 /** 
- * ImageContainer provides access to Panoramio photos that were taken near current location.
+ * ImageContainer class provides access to Panoramio photos that were taken near current location.
  */
 
-public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
+public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUpdater.Receiver{
 
 	private ArrayList<C_Image> images;
 	private int qtyNeeded;		// quantity of images needed for the slideshow
@@ -16,14 +17,20 @@ public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
 	private double _longitude;	// current geolocation coordinates
 	private double _latitude;
 	
-	/* ========= constructor ======  */
+	/**
+	 * Default constructor
+	 */
 	public C_ImageContainer(){
 		lastRequested = -1;
 		images = new ArrayList<C_Image>();
 		Controller.getInstance().getGeolocService().addListener(this);
 	}
 	
-	/* gets next ready image */
+	/**
+	 * Get next image with ready bitmap, providing circullar search within the container
+	 * 
+	 * @return	
+	 */
 	public C_Image getNext(){
 		
 		if (images.size() == 0){
@@ -61,7 +68,11 @@ public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
 		}
 	}
 		
-	/* get current image */
+	/**
+	 * Get current image
+	 * 
+	 * @return
+	 */
 	public C_Image getCurrent(){
 		if (lastRequested >= 0){
 			Log.println(Log.DEBUG, "panoramiator", "Requested curren image: " + lastRequested);
@@ -72,22 +83,37 @@ public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
 		}
 	}
 	
-	/* set cursor position to start of the list */
+	/**
+	 * Set internal cursor position to start of the container
+	 */
 	public void reset(){
 		lastRequested = -1;
 	}
 
-	/* get quantity of images desired to download */
+	/**
+	 * Get quantity of images that was asked to download
+	 * 
+	 * @return
+	 */
 	public int getQty(){
 		return qtyNeeded;
 	}
 	
-	/* get actual quantity of images, ready and non-ready */
+	
+	/**
+	 * Get actual quantity of images in the container, both ready and non-ready
+	 * 
+	 * @return
+	 */
 	public int getQtyActual(){
 		return images.size();
 	}
 	
-	/* get quantity of images that is already downloaded */
+	/**
+	 * Get quantity of images that have ready bitmap
+	 * 
+	 * @return
+	 */
 	public int getQtyReady(){
 		int qtyReady = 0;
 		for (C_Image image : images){
@@ -98,10 +124,14 @@ public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
 		return qtyReady;
 	}
 	
-	/* ============ updates quantity of images for the slideshow ========= */
+    /**
+     * Update desired quantity of images
+     * 
+     * @param qty
+     */
 	public void setQty(final int qty){
 		if (qty != qtyNeeded) {
-			if (qty > 0 && Controller.getInstance().getGeolocService().getLocationStatus()!= C_GeolocService.STATUS_DISABLED){
+			if (qty > 0 && Controller.getInstance().getGeolocService().getLocationStatus()!= C_GeolocService.Status.DISABLED){
 				qtyNeeded = qty;
 				if (qty > images.size()){
 					// if new quantity greater than existing, uploade new image list
@@ -116,18 +146,22 @@ public class C_ImageContainer implements I_GeolocListener, I_ImageListReceiver{
 		}
 	}
 	
-	/* ===== method(s) to implement I_GeolocListener interface ======== */
+	/**
+	 * C_GeolocService.Status interface implementation
+	 */
 	@Override
-	public void locationUpdate(double longitude, double latitude, int provider){
+	public void locationUpdate(double longitude, double latitude, C_GeolocService.Status provider){
 		_longitude = longitude;	//update location
 		_latitude = latitude;
 		// create and start imageListUpdater
-		if (provider != C_GeolocService.STATUS_DISABLED){
+		if (provider != C_GeolocService.Status.DISABLED){
 			new C_ImageListUpdater().getImagesPanoramio(this, ++idUpdater, _longitude, _latitude, qtyNeeded);
 		} 
 	}
 	
-	/* ===== method(s) to implement I_ImageListReceiver ================= */
+	/**
+	 * C_ImageListUpdater.Receiver interface implementation
+	 */
 	@Override 
 	public void receiveImageList(ArrayList<C_Image> imagesReceived, int id){
 		if (imagesReceived != null && id == idUpdater ){
