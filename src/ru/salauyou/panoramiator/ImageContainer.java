@@ -8,9 +8,9 @@ import android.util.Log;
  * ImageContainer class provides access to Panoramio photos that were taken near current location.
  */
 
-public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUpdater.Receiver{
+public class ImageContainer implements GeolocService.Listener, ImageListUpdater.Receiver{
 
-	private ArrayList<C_Image> images;
+	private ArrayList<Image> images;
 	private int qtyNeeded;		// quantity of images needed for the slideshow
 	private int lastRequested;		// index of last requested image in slide show
 	private int idUpdater;			// current callback id of ImageListUpdater
@@ -20,9 +20,9 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	/**
 	 * Default constructor
 	 */
-	public C_ImageContainer(){
+	public ImageContainer(){
 		lastRequested = -1;
-		images = new ArrayList<C_Image>();
+		images = new ArrayList<Image>();
 		Controller.getInstance().getGeolocService().addListener(this);
 	}
 	
@@ -31,7 +31,7 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	 * 
 	 * @return	
 	 */
-	public C_Image getNext(){
+	public Image getNext(){
 		
 		if (images.size() == 0){
 			return null;
@@ -73,7 +73,7 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	 * 
 	 * @return
 	 */
-	public C_Image getCurrent(){
+	public Image getCurrent(){
 		if (lastRequested >= 0){
 			Log.println(Log.DEBUG, "panoramiator", "Requested curren image: " + lastRequested);
 			return images.get(lastRequested);
@@ -116,7 +116,7 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	 */
 	public int getQtyReady(){
 		int qtyReady = 0;
-		for (C_Image image : images){
+		for (Image image : images){
 			if (image.isReady()){
 				qtyReady++;
 			}
@@ -131,14 +131,14 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
      */
 	public void setQty(final int qty){
 		if (qty != qtyNeeded) {
-			if (qty > 0 && Controller.getInstance().getGeolocService().getLocationStatus()!= C_GeolocService.Status.DISABLED){
+			if (qty > 0 && Controller.getInstance().getGeolocService().getLocationStatus()!= GeolocService.Status.DISABLED){
 				qtyNeeded = qty;
 				if (qty > images.size()){
 					// if new quantity greater than existing, uploade new image list
-					new C_ImageListUpdater().getImagesPanoramio(this, ++idUpdater, _longitude, _latitude, qtyNeeded);
+					new ImageListUpdater().getImagesPanoramio(this, ++idUpdater, _longitude, _latitude, qtyNeeded);
 				} else if (qty < images.size()){
 					// if new quantity less then existing, just rearrange image list
-					images = C_ImageListUpdater.getImagesNearestSorted(images, _longitude, _latitude, qtyNeeded);
+					images = ImageListUpdater.getImagesNearestSorted(images, _longitude, _latitude, qtyNeeded);
 				}
 			} else {
 				images.clear();
@@ -150,12 +150,12 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	 * C_GeolocService.Status interface implementation
 	 */
 	@Override
-	public void locationUpdate(double longitude, double latitude, C_GeolocService.Status provider){
+	public void locationUpdate(double longitude, double latitude, GeolocService.Status provider){
 		_longitude = longitude;	//update location
 		_latitude = latitude;
 		// create and start imageListUpdater
-		if (provider != C_GeolocService.Status.DISABLED){
-			new C_ImageListUpdater().getImagesPanoramio(this, ++idUpdater, _longitude, _latitude, qtyNeeded);
+		if (provider != GeolocService.Status.DISABLED){
+			new ImageListUpdater().getImagesPanoramio(this, ++idUpdater, _longitude, _latitude, qtyNeeded);
 		} 
 	}
 	
@@ -163,14 +163,14 @@ public class C_ImageContainer implements C_GeolocService.Listener, C_ImageListUp
 	 * C_ImageListUpdater.Receiver interface implementation
 	 */
 	@Override 
-	public void receiveImageList(ArrayList<C_Image> imagesReceived, int id){
+	public void receiveImageList(ArrayList<Image> imagesReceived, int id){
 		if (imagesReceived != null && id == idUpdater ){
 			// create new image list
-			ArrayList<C_Image> imagesNew = new ArrayList<C_Image>();
+			ArrayList<Image> imagesNew = new ArrayList<Image>();
 			boolean foundExisting;
-			for (C_Image imageReceived : imagesReceived){    // iteration within received images
+			for (Image imageReceived : imagesReceived){    // iteration within received images
 				foundExisting = false;
-				for (C_Image imageExisting : images){        // iteration within existing images
+				for (Image imageExisting : images){        // iteration within existing images
 					if (imageExisting.getUrl().equals(imageReceived.getUrl())){  
 						// if image with the same url was found within existing images
 						// add it into new image list

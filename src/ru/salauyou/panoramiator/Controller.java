@@ -11,12 +11,12 @@ import android.util.Log;
 public class Controller {
 	
 	private static volatile Controller instance;
-	private C_GeolocService geolocService;
-	private C_ImageContainer imageContainer;
+	private GeolocService geolocService;
+	private ImageContainer imageContainer;
 	
 	private Controller(){
 		// private constructor	
-		Log.println(Log.DEBUG, "panoramiator", "Controller created");
+		Log.d("debug", "Controller created");
 	}
 	
 	/**
@@ -28,16 +28,14 @@ public class Controller {
 		
 		// create and run geolocService using context for LocationManager
 		if (geolocService == null){
-			geolocService = new C_GeolocService(context);
-			Log.println(Log.DEBUG, "panoramiator", "Geoloc created");
+			geolocService = new GeolocService(context);
+			Log.d("debug", "Geoloc created");
 		}
 		// create and run imageContainer
 		if (imageContainer == null){
-			imageContainer = new C_ImageContainer();
-			Log.println(Log.DEBUG, "panoramiator", "Image Container created");
-			// add imageContainer as a Geoloc listener
+			imageContainer = new ImageContainer();
+			Log.d("debug", "Image Container created");
 			geolocService.addListener(imageContainer);
-			
 		}
 	}
 	
@@ -58,7 +56,7 @@ public class Controller {
 	 * 
 	 * @return	Geolocation service object
 	 */
-	public C_GeolocService getGeolocService() {
+	public GeolocService getGeolocService() {
 		return geolocService == null ? null : geolocService;
 	}
 	
@@ -66,7 +64,7 @@ public class Controller {
 	 * Get image container
 	 * @return	Image container
 	 */
-	public C_ImageContainer getImageContainer() {
+	public ImageContainer getImageContainer() {
 		return imageContainer == null ? null : imageContainer;
 	}
 	

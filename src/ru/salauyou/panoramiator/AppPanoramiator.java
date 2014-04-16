@@ -7,7 +7,7 @@ public class AppPanoramiator extends Application {
 	@Override
 	public void onCreate(){
 		super.onCreate();
-		Log.println(Log.DEBUG, "panoramiator", "Application created");
+		Log.d("debug", "Application created");
 		Controller.getInstance().runController(getApplicationContext());
 		Controller.getInstance().getImageContainer().setQty(10);
 	}

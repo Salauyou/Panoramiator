@@ -15,6 +15,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,7 +38,7 @@ public class ActivitySlideShow extends Activity {
 	ViewGroup layoutBackground;
 	int slideShowPeriod = 1500;
 	boolean slideShowStarted = false;
-	C_Image image;
+	Image image;
 	
 	// ----- handler to catch slide show scheduler messages ----- //
 	final Handler handlerSlideShow = new Handler(){
@@ -118,7 +119,7 @@ public class ActivitySlideShow extends Activity {
 			public View makeView(){
 				ImageView imageView = new ImageView(getApplicationContext());
 				imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-				imageView.setLayoutParams(new ImageSwitcher.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+				imageView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 				return imageView;
 			}
 		}); 
@@ -305,7 +306,7 @@ public class ActivitySlideShow extends Activity {
 	
 	// ---------- filling info layout with info about current image -------//
 	public void fillViewInfo(){
-		C_Image imageCurrent = Controller.getInstance().getImageContainer().getCurrent();
+		Image imageCurrent = Controller.getInstance().getImageContainer().getCurrent();
 		if (imageCurrent != null){
 			if (imageCurrent.getTitle().equals("")){
 				textViewInfoHeader.setVisibility(View.GONE);

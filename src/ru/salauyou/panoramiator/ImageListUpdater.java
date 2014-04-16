@@ -26,7 +26,7 @@ import android.util.Log;
  * sorted by date they were uploaded onto Panoramio (newest first).
  */
 
-public class C_ImageListUpdater {
+public class ImageListUpdater {
 
 	/**
 	 * Public interface to send new image list
@@ -39,7 +39,7 @@ public class C_ImageListUpdater {
 		 * @param imagesReceived	New list of images
 		 * @param id				Id similar to id of query (getImagesPanoramio)
 		 */
-		void receiveImageList(ArrayList<C_Image> imagesReceived, int id);
+		void receiveImageList(ArrayList<Image> imagesReceived, int id);
 
 	}
 	
@@ -54,7 +54,7 @@ public class C_ImageListUpdater {
 	// we'll use it when server is requested, to check whether last called 'id' is equal to current
 	private static volatile int idGetImagesPanoramio; 
 
-	ArrayList<C_Image> images = new ArrayList<C_Image>();
+	ArrayList<Image> images = new ArrayList<Image>();
 	
 	/* Method to download and process image list from Panoramio.
 	 * Runs in separate thread, returns result via I_ImageListReceiver.
@@ -165,7 +165,7 @@ public class C_ImageListUpdater {
 							// extract next image object...
 							JSONObject imageJson = (JSONObject)imagesJson.get(index);
 							// ... and add it into 'images' list
-							images.add(new C_Image(new SimpleDateFormat("dd MMMM yyyy", Locale.US).parse(imageJson.getString("upload_date")),
+							images.add(new Image(new SimpleDateFormat("dd MMMM yyyy", Locale.US).parse(imageJson.getString("upload_date")),
 									imageJson.getString("photo_file_url"), imageJson.getString("photo_url"),
 									imageJson.getString("owner_name"), imageJson.getString("photo_title"),
 									imageJson.getDouble("longitude"), imageJson.getDouble("latitude")));
@@ -256,7 +256,7 @@ public class C_ImageListUpdater {
 					//  get images list from Panoramio
 					panoramioGetImages(delta);
 					// and sort them
-					images = C_ImageListUpdater.getImagesNearestSorted(images, longitude, latitude, qty);
+					images = ImageListUpdater.getImagesNearestSorted(images, longitude, latitude, qty);
 					
 				} catch (Throwable e) {	
 					images.clear();
@@ -273,12 +273,12 @@ public class C_ImageListUpdater {
 	
 	
 	/* method to return needed quantity of images, nearest to given location and sorted by upload date, from the given list */
-	static public ArrayList<C_Image> getImagesNearestSorted(ArrayList<C_Image> imagesInput, final double longitude, final double latitude, final int qty){
+	static public ArrayList<Image> getImagesNearestSorted(ArrayList<Image> imagesInput, final double longitude, final double latitude, final int qty){
 		
 		// custom comparator for upload date sorting
-		Comparator<C_Image> comparatorDate = new Comparator<C_Image>(){
+		Comparator<Image> comparatorDate = new Comparator<Image>(){
 			@Override
-			public int compare(C_Image image1, C_Image image2){
+			public int compare(Image image1, Image image2){
 				if (image1.getDate().equals(image2.getDate())){
 					return 0;
 				} else { 
@@ -288,9 +288,9 @@ public class C_ImageListUpdater {
 		};
 	
 		// custom comparator for distance sorting
-		Comparator<C_Image> comparatorDistance = new Comparator<C_Image>(){
+		Comparator<Image> comparatorDistance = new Comparator<Image>(){
 			@Override
-			public int compare(C_Image image1, C_Image image2){
+			public int compare(Image image1, Image image2){
 				Location location1 = new Location(LocationManager.GPS_PROVIDER);
 				Location location2 = new Location(LocationManager.GPS_PROVIDER);
 				Location location = new Location(LocationManager.GPS_PROVIDER);
