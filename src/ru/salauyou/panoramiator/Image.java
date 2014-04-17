@@ -3,6 +3,9 @@ package ru.salauyou.panoramiator;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -13,7 +16,10 @@ import android.util.Log;
  * whether bitmap is ready.
  */
 public class Image {
-	private Bitmap bitmap;
+	
+	static private ExecutorService downloader;
+	static private final int MAX_DOWNLOAD_THREADS = 5;
+	
 	final private Date date;
 	final private String url;
 	final private double longitude;
@@ -21,9 +27,12 @@ public class Image {
 	final private String link;
 	final private String author;
 	final private String title;
+	
+	private volatile Bitmap bitmap;
 	private volatile boolean bitmapReady = false;
 	private volatile boolean bitmapRequested = false;
 
+	
 	/**
 	 * Public constructor
 	 * 
@@ -131,7 +140,10 @@ public class Image {
 	 */
 	public void startDownload(){
 		if (!bitmapRequested){
-			(new Thread(){
+			if (downloader == null || downloader.isShutdown()){
+				downloader = Executors.newFixedThreadPool(MAX_DOWNLOAD_THREADS);
+			} 
+			downloader.execute(new Runnable(){
 				@Override
 				public void run(){
 					try {
@@ -142,13 +154,13 @@ public class Image {
 						} else {
 							bitmapRequested = false;
 						}
-					} catch (IOException e) { 
+					} catch (IOException e) { 	
 						Log.d("debug", "Image by url:" + url + " cannot be downloaded");
 						bitmap = null;
-						bitmapRequested = false;
+						bitmapRequested = false;			
 					} 
 				}
-			}).start();
+			});
 			bitmapRequested = true;
 		}
 	}
