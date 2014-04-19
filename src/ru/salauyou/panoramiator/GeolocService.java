@@ -80,9 +80,8 @@ public class GeolocService {
 			@Override
 			public void onLocationChanged(Location locationNew) {
 
-				if (locationNew.getProvider().equals(LocationManager.GPS_PROVIDER)){
+				if (locationNew.getProvider().equals(LocationManager.GPS_PROVIDER))
 					isGpsAvailable = true;
-				}
 				
 				//   1 check if last location was obtained not from GPS nor Network provider 
 				// If yes, skip other conditions and update.
@@ -104,16 +103,15 @@ public class GeolocService {
 				{
 					
 					location = locationNew;
-					if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
+					if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) 
 						locationStatus = Status.GPS;
-					} else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
+					else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) 
 						locationStatus = Status.NETWORK;
-					}
+
 					// send new coordinates to listeners
 					for (Listener listener : listeners){
-						if (listener != null){
+						if (listener != null)
                             listener.locationUpdate(location.getLongitude(), location.getLatitude(), locationStatus);
-						}
 					}
 					Log.d("debug", "New location sent: " + locationStatus);
 				}
@@ -121,22 +119,18 @@ public class GeolocService {
 
 			@Override
 			public void onProviderDisabled(String provider) {
-				if (provider.equals(LocationManager.GPS_PROVIDER)){
+				if (provider.equals(LocationManager.GPS_PROVIDER))
 					isGpsAvailable = false;
-				}
 			}
 
 			@Override
-			public void onProviderEnabled(String provider) {
-
-			}
+			public void onProviderEnabled(String provider) { }
 
 			@Override
 			public void onStatusChanged(String provider, int status, Bundle extras) {
 				if (provider.equals(LocationManager.GPS_PROVIDER) 
-				    && (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE)){
+				    && (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE))
 					isGpsAvailable = false;
-				}
 			}		
 		}; 
 			
@@ -188,7 +182,7 @@ public class GeolocService {
 	 * @param listener	Must implement {@code GeolocService.Listener}
 	 */
 	public void addListener(Listener listener){
-		if (!listeners.contains(listener)) {
+		if (listener != null && !listeners.contains(listener)) {
 			listeners.add(listener);
 			listener.locationUpdate(location.getLongitude(), location.getLatitude(), locationStatus);
 			Log.d("debug", "Current location sent: " + locationStatus);
@@ -201,9 +195,10 @@ public class GeolocService {
 	 * @param listener	Must implement {@code GeolocService.Listener}
 	 */
 	public void removeListener(Listener listener){
-		int listenerPosition = listeners.indexOf(listener);
-		if (listenerPosition != -1){
-			listeners.remove(listeners.indexOf(listener));
+		if (listener != null){
+			int listenerPosition = listeners.indexOf(listener);
+			if (listenerPosition != -1)
+				listeners.remove(listeners.indexOf(listener));
 		}
 	}
 }
