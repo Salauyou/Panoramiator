@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.http.HttpEntity;
@@ -39,7 +40,7 @@ public class ImageListUpdater {
 		 * @param imagesReceived	New list of images
 		 * @param id				Id similar to id of query (getImagesPanoramio)
 		 */
-		void receiveImageList(ArrayList<Image> imagesReceived, int id);
+		void receiveImageList(List<Image> imagesReceived, int id);
 
 	}
 	
@@ -208,45 +209,6 @@ public class ImageListUpdater {
 						delta = (deltaR + deltaL)/2.0;
 					}
 					
-					
-					/*
-					// proceed golden section search
-					if ((deltaR - deltaL)>=DELTA_MIN){
-						double delta1 = (1-0.618)*(deltaR - deltaL) + deltaL;
-						double delta2 = 0.618*(deltaR - deltaL) + deltaL;
-						boolean hm1 = panoramioHasMore(delta1);
-						boolean hm2 = panoramioHasMore(delta2);
-						while ((deltaR - deltaL)>= DELTA_MIN){
-							if(!hm1 && hm2){
-								deltaL = delta1;
-								deltaR = delta2;
-								delta1 = (1-0.618)*(deltaR - deltaL) + deltaL;
-								delta2 = 0.618*(deltaR - deltaL) + deltaL;
-								if ((deltaR - deltaL)>=DELTA_MIN){
-									hm1 = panoramioHasMore(delta1);
-									hm2 = panoramioHasMore(delta2);
-								}
-							} else if (!hm1 && !hm2) {
-								deltaL = delta1;
-								delta1 = delta2;
-								delta2 = 0.618*(deltaR - deltaL) + deltaL;
-								if ((deltaR - deltaL)>=DELTA_MIN){
-									hm2 = panoramioHasMore(delta2);
-								}
-							} else if (hm1 && hm2){
-								deltaR = delta2;
-								delta2 = delta1;
-								delta1 = (1-0.618)*(deltaR - deltaL) + deltaL;
-								if ((deltaR - deltaL)>=DELTA_MIN){
-									hm1 = panoramioHasMore(delta1);
-								}
-							} else {
-								throw new Exception();
-							}
-						}
-					}
-					*/
-					
 					// set static delta fields for further use
 					delta = deltaR;
 					_latitudeDelta = delta;
@@ -256,7 +218,7 @@ public class ImageListUpdater {
 					//  get images list from Panoramio
 					panoramioGetImages(delta);
 					// and sort them
-					images = ImageListUpdater.getImagesNearestSorted(images, longitude, latitude, qty);
+					images = (ArrayList<Image>)ImageListUpdater.getImagesNearestSorted(images, longitude, latitude, qty);
 					
 				} catch (Throwable e) {	
 					images.clear();
@@ -273,7 +235,7 @@ public class ImageListUpdater {
 	
 	
 	/* method to return needed quantity of images, nearest to given location and sorted by upload date, from the given list */
-	static public ArrayList<Image> getImagesNearestSorted(ArrayList<Image> imagesInput, final double longitude, final double latitude, final int qty){
+	static public List<Image> getImagesNearestSorted(List<Image> imagesInput, final double longitude, final double latitude, final int qty){
 		
 		// custom comparator for upload date sorting
 		Comparator<Image> comparatorDate = new Comparator<Image>(){

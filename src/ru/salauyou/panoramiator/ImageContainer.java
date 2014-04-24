@@ -1,93 +1,71 @@
 package ru.salauyou.panoramiator;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import ru.salauyou.slideshowswipe.SlideShowSwipe;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 /** 
  * ImageContainer class provides access to Panoramio photos that were taken near current location.
  */
 
-public class ImageContainer implements GeolocService.Listener, ImageListUpdater.Receiver{
+public class ImageContainer implements GeolocService.Listener, ImageListUpdater.Receiver, SlideShowSwipe.BitmapContainer{
 
-	private ArrayList<Image> images;
+	private List<Image> images;
 	private int qtyNeeded;		// quantity of images needed for the slideshow
-	private int lastRequested;		// index of last requested image in slide show
 	private int idUpdater;			// current callback id of ImageListUpdater
 	private double _longitude;	// current geolocation coordinates
 	private double _latitude;
+	
+	private Image imageCurrent, imagePrec;
+	private int indexCurrent, indexPrec;
+	
+	
 	
 	/**
 	 * Default constructor
 	 */
 	public ImageContainer(){
-		lastRequested = -1;
 		images = new ArrayList<Image>();
 		Controller.getInstance().getGeolocService().addListener(this);
 	}
+
 	
-	/**
-	 * Get next image with ready bitmap, providing circullar search within the container
-	 * 
-	 * @return	
-	 */
-	public Image getNext(){
-		
-		if (images.size() == 0){
-			return null;
-		}
-		if (lastRequested == -1){
-			// at the first call, set lastRequested to the last element of the list,
-			// so the next element will be 0
-			lastRequested = images.size() - 1;
-		}
-		int next = lastRequested + 1;
-		int imageFound = -1;
-		// looking for next ready image in the list circulary
-		while(imageFound < 0 && next != lastRequested) {
-			if (next >= images.size()){
-				next = 0;
-			}
-			if (images.get(next).isReady()){
-				imageFound = next;
-			} else {
-				images.get(next).startDownload();
-			}
-			next++;
-		}
-		if (imageFound >= 0){
-			Log.println(Log.DEBUG, "panoramiator", "Requested next image: " + imageFound);
-			// if ready image was found, return it and move cursor to it
-			lastRequested = imageFound;
-			return images.get(imageFound);
-		} else {
-			// else, set cursor to the start position
-			Log.println(Log.DEBUG, "panoramiator", "Requested next image: " + imageFound);
-			lastRequested = -1;
-			return null;
-		}
-	}
 		
 	/**
 	 * Get current image
 	 * 
 	 * @return
 	 */
-	public Image getCurrent(){
-		if (lastRequested >= 0){
-			Log.println(Log.DEBUG, "panoramiator", "Requested curren image: " + lastRequested);
-			return images.get(lastRequested);
+	public Image getImageCurrent(){
+		Log.println(Log.DEBUG, "panoramiator", "Requested current image: " + indexPrec);
+		if (imageCurrent == null){
+			if (images != null && images.size() > 0){
+				if (images.get(0).isReady()){
+					imageCurrent = images.get(0);
+					indexCurrent = 0;
+					return imageCurrent;
+				} else {
+					images.get(0).startDownload();
+					return null;
+				}
+			} else {
+				return null;
+			}
 		} else {
-			Log.println(Log.DEBUG, "panoramiator", "Requested curren image: " + lastRequested);
-			return null;
+			return imageCurrent;
 		}
 	}
+	
+	
 	
 	/**
 	 * Set internal cursor position to start of the container
 	 */
 	public void reset(){
-		lastRequested = -1;
+		indexCurrent = indexPrec = 0;
 	}
 
 	/**
@@ -100,6 +78,7 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 	}
 	
 	
+	
 	/**
 	 * Get actual quantity of images in the container, both ready and non-ready
 	 * 
@@ -108,6 +87,8 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 	public int getQtyActual(){
 		return images.size();
 	}
+	
+	
 	
 	/**
 	 * Get quantity of images that have ready bitmap
@@ -123,6 +104,8 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 		}
 		return qtyReady;
 	}
+	
+	
 	
     /**
      * Update desired quantity of images
@@ -146,6 +129,8 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 		}
 	}
 	
+	
+	
 	/**
 	 * C_GeolocService.Status interface implementation
 	 */
@@ -159,14 +144,16 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 		} 
 	}
 	
+	
+	
 	/**
 	 * C_ImageListUpdater.Receiver interface implementation
 	 */
 	@Override 
-	public void receiveImageList(ArrayList<Image> imagesReceived, int id){
+	public void receiveImageList(List<Image> imagesReceived, int id){
 		if (imagesReceived != null && id == idUpdater ){
 			// create new image list
-			ArrayList<Image> imagesNew = new ArrayList<Image>();
+			List<Image> imagesNew = new ArrayList<Image>();
 			boolean foundExisting;
 			for (Image imageReceived : imagesReceived){    // iteration within received images
 				foundExisting = false;
@@ -187,5 +174,95 @@ public class ImageContainer implements GeolocService.Listener, ImageListUpdater.
 			}
 			images = imagesNew;		// replace images list with newly created list						
 		}
+	}
+
+	
+	/**
+	 * SlideShowSwipe.BitmapContainer implementation
+	 */
+	@Override
+	public Bitmap getBitmapNext() {
+		if (images.size() == 0){
+			return null;
+		}
+		
+		int imageFound = -1;
+		
+		// looking for next ready image in the list circularily
+		for (int i = indexCurrent + 1; imageFound < 0 && i != indexCurrent; i++) {
+			if (i >= images.size()){
+				i = 0;
+			}
+			if (images.get(i).isReady()){
+				imageFound = i;
+			} else {
+				images.get(i).startDownload();
+			}
+		}
+		
+		// if ready image was found, return it and move cursor to it
+		if (imageFound >= 0){
+			Log.println(Log.DEBUG, "debug", "Requested next image: " + imageFound);
+			indexPrec = indexCurrent;
+			indexCurrent = imageFound;
+			imagePrec = imageCurrent;
+			imageCurrent = images.get(imageFound);
+			return images.get(imageFound).getBitmap();
+		} else {
+			// else, set cursor to the start position
+			Log.println(Log.DEBUG, "debug", "Requested next image: not found");
+			indexPrec = 0;
+			return null;
+		}
+	}
+
+	
+	
+	@Override
+	public Bitmap getBitmapPrevious() {
+		if (images.size() == 0){
+			return null;
+		}
+		
+		int imageFound = -1;
+		
+		for (int i = indexCurrent - 1; imageFound < 0 && i != indexCurrent; i--) {
+			if (i < 0){
+				i = images.size() - 1;
+			}
+			if (images.get(i).isReady()){
+				imageFound = i;
+			} else {
+				images.get(i).startDownload();
+			}
+		}
+		if (imageFound >= 0){
+			Log.println(Log.DEBUG, "debug", "Requested previous image: " + imageFound);
+			indexPrec = indexCurrent;
+			indexCurrent = imageFound;
+			imagePrec = imageCurrent;
+			imageCurrent = images.get(imageFound);
+			return images.get(imageFound).getBitmap();
+		} else {
+			// else, set cursor to the start position
+			Log.println(Log.DEBUG, "debug", "Requested previous image: not found");
+			indexPrec = 0;
+			return null;
+		}
+	}
+
+	
+	
+	@Override
+	public Bitmap getBitmapCurrent() {
+		return getImageCurrent() == null ? null : getImageCurrent().getBitmap();
+	}
+
+	
+	
+	@Override
+	public void undoGetBitmap() {
+		imageCurrent = imagePrec;
+		indexCurrent = indexPrec;
 	}
 }

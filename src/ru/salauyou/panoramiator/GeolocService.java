@@ -2,6 +2,7 @@ package ru.salauyou.panoramiator;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;

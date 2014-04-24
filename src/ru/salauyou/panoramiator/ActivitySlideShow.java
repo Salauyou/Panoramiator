@@ -1,106 +1,46 @@
 package ru.salauyou.panoramiator;
 
+import ru.salauyou.slideshowswipe.SlideShowSwipe;
+import ru.salauyou.slideshowswipe.SlideShowSwipe.State;
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.ViewSwitcher.ViewFactory;
 
-public class ActivitySlideShow extends Activity {
+public class ActivitySlideShow extends Activity implements SlideShowSwipe.OnStateChangeListener {
 
-	ImageSwitcher imageSwitcherSlideShow;
-	private int imageNumber = 0;
-	SchedulerSlideShow schedulerSlideShow;
+	SlideShowSwipe slideShow;
+	
 	ProgressBar progressBar;
 	View layoutInfo;
 	Button buttonInfo;
-	Animation animLayoutInfoIn, animLayoutInfoOut, animButtonInfoIn, animButtonInfoOut;
-	boolean viewInfoOpened = false;
+	Animation animLayoutInfoIn, animLayoutInfoOut, animButtonInfoIn, animButtonInfoOut, animButtonInfoOutAndDisappear;
 	ImageView imageButtonInfo;
 	TextView textViewInfoAuthor, textViewInfoDate, textViewInfoLink, textViewStatus, textViewInfoHeader;
 	View decorView;
-	ViewGroup layoutBackground;
+	
 	int slideShowPeriod = 1500;
-	boolean slideShowStarted = false;
-	Image image;
+
+	ActivitySlideShow self = this;
 	
-	// ----- handler to catch slide show scheduler messages ----- //
-	final Handler handlerSlideShow = new Handler(){
-		@Override
-		public void handleMessage(Message msg){	
-			// show next image
-			slideShowNext();
-		}
-	};
-	
-	// ----- thread class to schedule the slide show -------- //
-	class SchedulerSlideShow extends Thread {
-		
-		static public final int SLIDESHOW_NEXT = 0;
-		static public final int SLIDESHOW_PAUSE = 1;
-		private volatile boolean paused = true;
-		private final Object pauseObject = new Object();
-		
-		
-		@Override
-		public void run(){
-			try {
-				while(true){
-					Thread.sleep(slideShowPeriod);
-					while (paused) {
-						synchronized(pauseObject) {
-							pauseObject.wait();
-						}
-					}
-					handlerSlideShow.sendMessage(Message.obtain());
-				}
-			} catch (InterruptedException e) { }
-		}
-		
-		// pause method
-		public void pause(){
-			paused = true;
-		}
-		
-		// resume method
-		public void unPause(){
-			paused = false;
-			synchronized(pauseObject) {
-				pauseObject.notify();
-			}
-		}
-		
-		// return if the scheduler is paused
-		public boolean isPaused(){
-			return paused;
-		}
-	};
-	
-	
-	// ----- onCreate -----------//
+
+	/**
+	 * {@code onCreate()} override
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_slideshow);
 		
-		// get all needed views
-		layoutBackground = (ViewGroup)findViewById(R.id.layoutBackground);
+	
 		progressBar = (ProgressBar)findViewById(R.id.progressBar);
 		layoutInfo = (View)findViewById(R.id.layoutInfo);
 		buttonInfo = (Button)findViewById(R.id.buttonInfo);
@@ -110,191 +50,133 @@ public class ActivitySlideShow extends Activity {
 		textViewInfoDate = (TextView)findViewById(R.id.layoutInfoDate);
 		textViewInfoLink = (TextView)findViewById(R.id.layoutInfoLink);
 		textViewStatus = (TextView)findViewById(R.id.textViewStatus);
-		imageSwitcherSlideShow = (ImageSwitcher)findViewById(R.id.imageSwitcherSlideShow);	
+		slideShow = (SlideShowSwipe)findViewById(R.id.slideShow);	
 		decorView = getWindow().getDecorView();
+
 		
-		// set up image factory to slide show view
-		imageSwitcherSlideShow.setFactory(new ViewFactory(){
-			@Override
-			public View makeView(){
-				ImageView imageView = new ImageView(getApplicationContext());
-				imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-				imageView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-				return imageView;
-			}
-		}); 
-		
-		// load animators
 		animLayoutInfoIn = AnimationUtils.loadAnimation(this, R.anim.view_info_in);
 		animLayoutInfoOut = AnimationUtils.loadAnimation(this, R.anim.view_info_out);
 		animButtonInfoIn = AnimationUtils.loadAnimation(this, R.anim.button_info_in);
 		animButtonInfoOut = AnimationUtils.loadAnimation(this, R.anim.button_info_out);
+		animButtonInfoOutAndDisappear = AnimationUtils.loadAnimation(this, R.anim.button_info_out);
 		
-		// set listener to info view out animation
+
 		animLayoutInfoOut.setAnimationListener(new AnimationListener() {
 			@Override
 			public void onAnimationEnd(Animation arg0) {
-				layoutInfo.setVisibility(View.INVISIBLE);
+				layoutInfo.setVisibility(View.GONE);
 			}
+			
+			@Override
+			public void onAnimationRepeat(Animation arg0) { }
+
+			@Override
+			public void onAnimationStart(Animation arg0) { }
+		});
+
+		
+		animLayoutInfoIn.setAnimationListener(new AnimationListener(){
+			@Override
+			public void onAnimationEnd(Animation arg0) { }
+			
 			@Override
 			public void onAnimationRepeat(Animation arg0) { }
 
 			@Override
 			public void onAnimationStart(Animation arg0) { 
-				layoutInfo.setVisibility(View.INVISIBLE);
+				decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+				slideShow.setKeepScreenOn(false);
+				layoutInfo.setVisibility(View.VISIBLE);
+				fillViewInfo();
 			}
 		});
 		
-		
-		// set up animators
-		Animation animationSlideShowIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
-		Animation animationSlideShowOut = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_out);
-		imageSwitcherSlideShow.setInAnimation(animationSlideShowIn);
-		imageSwitcherSlideShow.setOutAnimation(animationSlideShowOut);
-		
-		// proceed intent that started activity
-		Intent intent = getIntent();
-		if (intent != null && intent.hasExtra("slideShowPeriod")){
-			slideShowPeriod = intent.getIntExtra("slideShowPeriod", slideShowPeriod);
-		}
-		
-		// restore info view state
-		// if slide show period was saved on bundle, restore it
-		if (savedInstanceState != null && savedInstanceState.containsKey("slideShowPeriod")){
-			slideShowPeriod = savedInstanceState.getInt("slideShowPeriod");
-		}
-		
-		// discover if slide show was started
-		if (Controller.getInstance().getImageContainer().getCurrent() != null){
-			slideShowStarted = true;
-		}
-		
-		// if info view was visible, make info button rotated and put text into text views
-		if (savedInstanceState != null && savedInstanceState.containsKey("viewInfoOpened") && savedInstanceState.getBoolean("viewInfoOpened")){
-			imageButtonInfo.startAnimation(animButtonInfoIn);
-			viewInfoOpened = true;
-			fillViewInfo();
-		} else {
-			// if info view was not visible and slide show was not paused, hide info button 
-			if (savedInstanceState == null || !savedInstanceState.containsKey("schedulerSlideShowPaused") || !savedInstanceState.getBoolean("schedulerSlideShowPaused")){
-				buttonInfo.setVisibility(View.INVISIBLE);
-				imageButtonInfo.setVisibility(View.INVISIBLE);
+		animButtonInfoOutAndDisappear.setAnimationListener(new AnimationListener(){
+			@Override
+			public void onAnimationEnd(Animation arg0) {
+				buttonInfo.setVisibility(View.GONE);
+				imageButtonInfo.setVisibility(View.GONE);
 			}
-			// hide info view
-			layoutInfo.setVisibility(View.INVISIBLE);
+
+			@Override
+			public void onAnimationRepeat(Animation arg0) { }
+
+			@Override
+			public void onAnimationStart(Animation arg0) { }
+			
+		});
+		
+		
+		buttonInfo.setVisibility(View.GONE);
+		imageButtonInfo.setVisibility(View.GONE);
+		layoutInfo.setVisibility(View.GONE);
+		
+		
+		
+		if (getIntent() != null && getIntent().hasExtra("slideShowPeriod"))
+				slideShowPeriod = getIntent().getIntExtra("slideShowPeriod", slideShowPeriod);
+
+		
+		// restore values from saved instance state
+		if (savedInstanceState != null){
+			if (savedInstanceState.containsKey("slideShowPeriod"))
+				slideShowPeriod = savedInstanceState.getInt("slideShowPeriod");
+				
+			if (savedInstanceState.containsKey("slideShowPaused") && savedInstanceState.getBoolean("slideShowPaused")){
+				buttonInfo.setVisibility(View.VISIBLE);
+				imageButtonInfo.setVisibility(View.VISIBLE);
+			}
+			
+			if (savedInstanceState.containsKey("viewInfoOpened") && savedInstanceState.getBoolean("viewInfoOpened")){
+				layoutInfo.setVisibility(View.VISIBLE);
+				imageButtonInfo.startAnimation(animButtonInfoIn);
+				fillViewInfo();
+			}
 		}
-		
-		// put current image onto slideshow
-		if (savedInstanceState != null && savedInstanceState.containsKey("imageNumber")){
-			imageNumber = savedInstanceState.getInt("imageNumber");
-			if (Controller.getInstance().getImageContainer().getCurrent()!= null){
-				imageSwitcherSlideShow.setImageDrawable(new BitmapDrawable(getResources(), Controller.getInstance().getImageContainer().getCurrent().getBitmap()));
-				progressBar.setVisibility(View.INVISIBLE);
-				textViewStatus.setVisibility(View.INVISIBLE);
-			} 
-		}
-		
-		// create and start scheduler thread
-		schedulerSlideShow = new SchedulerSlideShow();
-		schedulerSlideShow.start();
-		
-		// run scheduler if it was unpaused
-		if (savedInstanceState == null || !savedInstanceState.containsKey("schedulerSlideShowPaused") 
-				|| !savedInstanceState.getBoolean("schedulerSlideShowPaused") || !slideShowStarted){
-			slideShowToggle(imageSwitcherSlideShow);
-		}
-		
+
+		// attach bitmap container and start slide show demonstration
+		slideShow.setBitmapContainer(Controller.getInstance().getImageContainer())
+			.setSlideShowPeriod(slideShowPeriod)
+			.setSlideShowTransition(500)
+			.setOnStateChangeListener(this);
+			
+		// check if slide show is already started
+		if (Controller.getInstance().getImageContainer().getBitmapCurrent() != null 
+				&& savedInstanceState != null && savedInstanceState.containsKey("slideShowPaused")){
+			slideShow.restoreCurrent(savedInstanceState.getBoolean("slideShowPaused"));
+			progressBar.setVisibility(View.GONE);
+			textViewStatus.setVisibility(View.GONE);
+		} else
+			slideShow.startSlideShow();	
+	
+				
 		// log
 		Log.println(Log.DEBUG, "panoramiator", "Slide Show Activity created");
 	}
 	
-	//-------- pause slide show activity -----------//
-	protected void onPause(){
-		if (!schedulerSlideShow.isPaused()){
-			if (slideShowStarted){
-				slideShowToggle(imageSwitcherSlideShow);
-			} else {
-				schedulerSlideShow.pause();
-			}
-		}
-		super.onPause();
-	}
+	
 	
 	//--------- save slide show state on activity pause ------------//
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-	  super.onSaveInstanceState(savedInstanceState);
-	  savedInstanceState.putBoolean("schedulerSlideShowPaused", schedulerSlideShow.isPaused());
-	  savedInstanceState.putInt("imageNumber", imageNumber);
-	  savedInstanceState.putBoolean("viewInfoOpened", viewInfoOpened);
-	  savedInstanceState.putInt("slideShowPeriod", slideShowPeriod);
+		super.onSaveInstanceState(savedInstanceState);
+		savedInstanceState.putBoolean("viewInfoOpened", layoutInfo.getVisibility() == View.VISIBLE ? true : false);
+		savedInstanceState.putInt("slideShowPeriod", slideShowPeriod);
+		savedInstanceState.putBoolean("slideShowPaused", slideShow.getState() == State.SLIDESHOW_PAUSED ? true : false);
 	}
-	
-	//------- touching the slide show view toggles slide show -------- //
-	public void slideShowToggle(View view){
-		if (!schedulerSlideShow.isPaused() && slideShowStarted){
-			// if not paused, do pause, except if slide show not started yet
-			schedulerSlideShow.pause();
-			// show info button
-			buttonInfo.setVisibility(View.VISIBLE);
-			imageButtonInfo.setVisibility(View.VISIBLE);
-			// undim status and navigation bar
-			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-			// cancel going sleep prevention
-			imageSwitcherSlideShow.setKeepScreenOn(false);
-		} else if (schedulerSlideShow.isPaused() || !slideShowStarted) {
-			// if paused, do resume
-			if (viewInfoOpened){
-				// animatedly close info view
-				viewInfoToggle(view);
-			}
-			schedulerSlideShow.unPause();
-			// hide info button
-			buttonInfo.setVisibility(View.INVISIBLE);
-			imageButtonInfo.setVisibility(View.INVISIBLE);
-			// hide layout info
-			layoutInfo.setVisibility(View.INVISIBLE);
-			// dim status bar and navigation bar
-			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-			// prevent from going sleep
-			imageSwitcherSlideShow.setKeepScreenOn(true);
-		}
-	}
-	
 	
 
-	// ----------- next slide -------//
-	public void slideShowNext(){
-		image = Controller.getInstance().getImageContainer().getNext();
-		if (image != null) {
-			// mark that slide show started
-			slideShowStarted = true;
-			imageSwitcherSlideShow.setImageDrawable(new BitmapDrawable(getResources(), image.getBitmap()));
-		
-			// hide progress bar
-			if (progressBar.getVisibility() == View.VISIBLE){
-				progressBar.setVisibility(View.INVISIBLE);
-				textViewStatus.setVisibility(View.INVISIBLE);
-			}
-			// dim status bar and navigation bar
-			// this is duplicated to proceed after device awake
-			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-		}
-	}
-	
 	
 	// ---------- info button click ------------- //
 	public void viewInfoToggle(View view){
-		if (!viewInfoOpened){
+		if (layoutInfo.getVisibility() != View.VISIBLE){
 			layoutInfo.startAnimation(animLayoutInfoIn);
 			imageButtonInfo.startAnimation(animButtonInfoIn);
 			layoutInfo.setVisibility(View.VISIBLE);
-			viewInfoOpened = true;
 			fillViewInfo();
 		} else {
 			layoutInfo.startAnimation(animLayoutInfoOut);
 			imageButtonInfo.startAnimation(animButtonInfoOut);
-			viewInfoOpened = false;
 		}
 	}
 	
@@ -306,7 +188,7 @@ public class ActivitySlideShow extends Activity {
 	
 	// ---------- filling info layout with info about current image -------//
 	public void fillViewInfo(){
-		Image imageCurrent = Controller.getInstance().getImageContainer().getCurrent();
+		Image imageCurrent = Controller.getInstance().getImageContainer().getImageCurrent();
 		if (imageCurrent != null){
 			if (imageCurrent.getTitle().equals("")){
 				textViewInfoHeader.setVisibility(View.GONE);
@@ -318,6 +200,39 @@ public class ActivitySlideShow extends Activity {
 			textViewInfoDate.setText(DateFormat.format("d MMMM yyyy", imageCurrent.getDate()));
 			textViewInfoLink.setText(imageCurrent.getLink());
 		}	
+	}
+
+
+	/* ============ SlideShowSwipe.OnStateChangeListener implementation  =========== */
+	
+	@Override
+	public void onStateChange(State state) {
+		if (state == State.SLIDESHOW_STARTED){
+			if (layoutInfo.getVisibility() == View.VISIBLE){
+				layoutInfo.startAnimation(animLayoutInfoOut);
+				imageButtonInfo.startAnimation(animButtonInfoOutAndDisappear);
+			} else {
+				imageButtonInfo.setVisibility(View.GONE);
+				buttonInfo.setVisibility(View.GONE);
+			}
+			slideShow.setKeepScreenOn(true);
+			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+		} else if (state == State.SLIDESHOW_PAUSED){
+			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+			slideShow.setKeepScreenOn(false);
+			buttonInfo.setVisibility(View.VISIBLE);
+			imageButtonInfo.setVisibility(View.VISIBLE);
+		}
+	}
+
+	@Override
+	public void onCurrentBitmapChange() {
+		if (layoutInfo.getVisibility() == View.VISIBLE)
+			fillViewInfo();
+		if (progressBar.getVisibility() == View.VISIBLE){
+			progressBar.setVisibility(View.GONE);
+			textViewStatus.setVisibility(View.GONE);
+		}
 	}
 		
 

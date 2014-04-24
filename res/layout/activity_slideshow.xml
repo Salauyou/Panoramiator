@@ -26,12 +26,12 @@
         android:textColor="#aaa"
         />
     
-    <ImageSwitcher
-        android:id="@+id/imageSwitcherSlideShow"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:onClick="slideShowToggle"
-        />
+    <ru.salauyou.slideshowswipe.SlideShowSwipe
+        android:id="@+id/slideShow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        
+    	/>
     
     <!-- layout to show image info -->
     <RelativeLayout 
